@@ -24,11 +24,22 @@ def extract_traffic():
     url = 'https://eismoinfo.lt/traffic-intensity-service#'
     res = requests.get(url)
     res = res.json()
-    return res
 
-def transform_traffic(res):
     data = {}
-    data.DataFrame()
+    data['ID']=res['id']
+    data['Road_Nr']=res['roadNr']
+    data['Road_Name']=res['roadName']
+    data['Km']=res['km']
+    data['Lat']=res['x']
+    data['Long']=res['y']
+
+    print(data)
+
+def load_traffic():
+    res = extract_traffic()
+    TRes = transform_traffic(res)
+    print(res)
+
 
 
 # with DAG (
@@ -40,4 +51,4 @@ def transform_traffic(res):
 #         python_callable = extract_traffic
 #     )
 
-call_traffic()
+extract_traffic()
