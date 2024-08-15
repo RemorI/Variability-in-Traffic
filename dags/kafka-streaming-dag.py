@@ -25,20 +25,18 @@ def extract_traffic():
     res = requests.get(url)
     res = res.json()
 
-    data = {}
-    data['ID']=res['id']
-    data['Road_Nr']=res['roadNr']
-    data['Road_Name']=res['roadName']
-    data['Km']=res['km']
-    data['Lat']=res['x']
-    data['Long']=res['y']
+    return res
 
-    print(data)
+def transform_traffic(res):
+    df = pd.json_normalize(res, 'roadSegments', ['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y'])
+    df = df[['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'direction', 'numberOfVehicles', 'averageSpeed', 'trafficType', 'winterSpeed', 'summerSpeed']]
+    
+    return df
 
 def load_traffic():
     res = extract_traffic()
-    TRes = transform_traffic(res)
-    print(res)
+    df = transform_traffic(res)
+    print(df)
 
 
 
@@ -51,4 +49,4 @@ def load_traffic():
 #         python_callable = extract_traffic
 #     )
 
-extract_traffic()
+load_traffic()
