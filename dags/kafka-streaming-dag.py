@@ -6,8 +6,6 @@ import pandas as pd
 #from airflow import DAG
 #from airflow.operators.python import PythonOperator
 
-from api_keys import API_Weather, API_Traffic
-
 # default_args = {
 #     'owner': 'blight',
 #     'start_date': datetime(2024, 8, 8, 00, 00),
@@ -15,29 +13,33 @@ from api_keys import API_Weather, API_Traffic
 # }
 
 def call_weather():
-    lat = ''
-    lon = ''
-    API_key = API_Weather
-    url = f'https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_key}'
+    url = 'https://eismoinfo.lt/weather-conditions-service'
+    res_w = requests.get(url)
+    res_w = res_w.json
+
+    return res_w
+
+def transform_weather(res_w):
+    df
+
 
 def extract_traffic():
     url = 'https://eismoinfo.lt/traffic-intensity-service#'
-    res = requests.get(url)
-    res = res.json()
+    res_t = requests.get(url)
+    res_t = res_t.json()
 
-    return res
+    return res_t
 
-def transform_traffic(res):
-    df = pd.json_normalize(res, 'roadSegments', ['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y'])
+def transform_traffic(res_t):
+    df = pd.json_normalize(res_t, 'roadSegments', ['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y'])
     df = df[['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'direction', 'numberOfVehicles', 'averageSpeed', 'trafficType', 'winterSpeed', 'summerSpeed']]
     
     return df
 
 def load_traffic():
-    res = extract_traffic()
-    df = transform_traffic(res)
+    res_t = extract_traffic()
+    df = transform_traffic(res_t)
     print(df)
-
 
 
 # with DAG (
