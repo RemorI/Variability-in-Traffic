@@ -23,7 +23,28 @@ def transform_weather(res_w):
     df_w = pd.json_normalize(res_w)
 
     df_w = df_w[['id', 'irenginys', 'numeris', 'pavadinimas', 'oro_temperatura', 'krituliu_tipas', 'krituliu_kiekis', 'uzsalimo_taskas', 'dangos_temperatura', 'kelio_danga', 'vejo_greitis_maks', 'vejo_greitis_vidut', 'vejo_kryptis', 'sukibimo_koeficientas', 'matomumas', 'kilometras', 'lat', 'lng', 'surinkimo_data']]
-    df_w.columns = ['id', 'station', 'roadNr', 'roadName', 'air_temperature', 'precipitation_type', 'precipitation_amount', 'freezing_point', 'surface_temperature', 'surface_condition', 'max_wind_speed', 'avg_wind_speed', 'wind_direction', 'friction', 'visibility', 'km', 'x', 'y', 'date_data']
+    df_w.columns = ['id', 'station', 'roadNr', 'roadName', 'air_temperature', 'precipitation_type', 'precipitation_amount', 'freezing_point', 'surface_temperature', 'surface_condition', 'max_wind_speed', 'avg_wind_speed', 'wind_direction', 'friction', 'visibility', 'km', 'x', 'y', 'date']
+    
+    replace_direction = {
+        'Pietų': 'South',
+        'Pietryčių': 'Southeast',
+        'Pietvakarių': 'Southwest',
+        'Šiaurė': 'North',
+        'Šiaurės rytų': 'Northeast',
+        'Šiaurės vakarai': 'Northwest',
+        'Rytų': 'East',
+        'Vakarus': 'West',
+    }
+
+    replace_precipitation = {
+        'Nėra': 'No rain',
+        'Lietus, silpnas': 'Light rain',
+        'Migla': 'Foggy',
+    }
+
+    df_w['wind_direction'] = df_w['wind_direction'].replace(replace_direction)
+    df_w['precipitation_type'] = df_w['precipitation_type'].replace(replace_precipitation)
+    
     return df_w
 
 
@@ -35,9 +56,9 @@ def extract_traffic():
     return res_t
 
 def transform_traffic(res_t):
-    df_t = pd.json_normalize(res_t, 'roadSegments', ['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y'])
-    df_t = df_t[['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'direction', 'numberOfVehicles', 'averageSpeed', 'trafficType', 'winterSpeed', 'summerSpeed']]
-    
+    df_t = pd.json_normalize(res_t, 'roadSegments', ['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'date'])
+    df_t = df_t[['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'direction', 'numberOfVehicles', 'averageSpeed', 'trafficType', 'winterSpeed', 'summerSpeed', 'date']]
+
     return df_t
 
 def load_traffic():
