@@ -12,10 +12,10 @@ import pandas as pd
 #     'schedule_interval': '@daily',
 # }
 
-def call_weather():
+def extract_weather():
     url = 'https://eismoinfo.lt/weather-conditions-service'
     res_w = requests.get(url)
-    res_w = res_w.json
+    res_w = res_w.json()
 
     return res_w
 
@@ -29,11 +29,11 @@ def transform_weather(res_w):
         'Pietų': 'South',
         'Pietryčių': 'Southeast',
         'Pietvakarių': 'Southwest',
-        'Šiaurė': 'North',
+        'Šiaurės': 'North', 
         'Šiaurės rytų': 'Northeast',
-        'Šiaurės vakarai': 'Northwest',
+        'Šiaurės vakarų': 'Northwest',
         'Rytų': 'East',
-        'Vakarus': 'West',
+        'Vakarų': 'West',
     }
 
     replace_precipitation = {
@@ -58,13 +58,17 @@ def extract_traffic():
 def transform_traffic(res_t):
     df_t = pd.json_normalize(res_t, 'roadSegments', ['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'date'])
     df_t = df_t[['id', 'name', 'roadNr', 'roadName', 'km', 'x', 'y', 'direction', 'numberOfVehicles', 'averageSpeed', 'trafficType', 'winterSpeed', 'summerSpeed', 'date']]
-
+    
     return df_t
 
 def load_traffic():
     res_t = extract_traffic()
-    df = transform_traffic(res_t)
-    print(df)
+    df_t = transform_traffic(res_t)
+
+    res_w = extract_weather()
+    df_w = transform_weather(res_w)
+    
+    return df_t, df_w
 
 
 # with DAG (
@@ -76,4 +80,5 @@ def load_traffic():
 #         python_callable = extract_traffic
 #     )
 
-load_traffic()
+Data_Traffic, Data_Weather = load_traffic()
+print(Data_Traffic.iloc[0], Data_Weather.iloc[0])
