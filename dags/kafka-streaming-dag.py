@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import requests
 import pandas as pd
+from kafka import KafkaProducer
 
 #from airflow import DAG
 #from airflow.operators.python import PythonOperator
@@ -68,8 +69,12 @@ def load_traffic():
     res_w = extract_weather()
     df_w = transform_weather(res_w)
     
-    return df_t, df_w
+    #return df_t, df_w
 
+    df_t = pd.DataFrame.to_json(df_t)
+
+    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+    producer.send('daily_traffic', json.dumps(df_t).encode('utf-8'))
 
 # with DAG (
 #     'traffic-climate-analysis',
@@ -80,5 +85,5 @@ def load_traffic():
 #         python_callable = extract_traffic
 #     )
 
-Data_Traffic, Data_Weather = load_traffic()
-print(Data_Traffic.iloc[0], Data_Weather.iloc[0])
+load_traffic()
+#print(Data_Traffic.iloc[0], Data_Weather.iloc[0])
