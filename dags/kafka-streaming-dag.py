@@ -1,17 +1,21 @@
 from datetime import datetime
+import time
 import json
 import requests
 import pandas as pd
 from kafka import KafkaProducer
+import logging
 
-#from airflow import DAG
-#from airflow.operators.python import PythonOperator
+from airflow import DAG
+from airflow.operators.python import PythonOperator
 
-# default_args = {
-#     'owner': 'blight',
-#     'start_date': datetime(2024, 8, 8, 00, 00),
-#     'schedule_interval': '@daily',
-# }
+curr_time = time.time()
+
+default_args = {
+    'owner': 'blight',
+    'start_date': datetime(2024, 8, 8, 00, 00),
+    'schedule_interval': '@daily',
+}
 
 def extract_weather():
     url = 'https://eismoinfo.lt/weather-conditions-service'
@@ -68,22 +72,23 @@ def load_traffic():
 
     res_w = extract_weather()
     df_w = transform_weather(res_w)
-    
-    #return df_t, df_w
 
     df_t = pd.DataFrame.to_json(df_t)
+    df_w = pd.DataFrame.to_json(df_w)
 
-    producer = KafkaProducer(bootstrap_servers=['localhost:9092'], max_block_ms=5000)
+    producer = KafkaProducer(bootstrap_servers=['broker:29092'], max_block_ms=5000)
     producer.send('daily_traffic', json.dumps(df_t).encode('utf-8'))
+    producer.send('daily_weather', json.dumps(df_w).encode('utf-8'))
 
-# with DAG (
-#     'traffic-climate-analysis',
-#     catchup = False,
-# ) as dag:
-#     streaming_task = PythonOperator(
-#         task_id = 'stream-traffic',
-#         python_callable = extract_traffic
-#     )
 
-load_traffic()
+with DAG (
+    'traffic-climate-analysis',
+    catchup = False,
+) as dag:
+    streaming_task = PythonOperator(
+        task_id = 'stream-traffic',
+        python_callable = load_traffic
+    )
+
+#load_traffic()
 #print(Data_Traffic.iloc[0], Data_Weather.iloc[0])
