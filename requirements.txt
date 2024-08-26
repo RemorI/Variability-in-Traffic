@@ -101,6 +101,7 @@ psutil==6.0.0
 pycparser==2.22
 Pygments==2.18.0
 PyJWT==2.9.0
+pyopenssl==24.2.1
 python-daemon==3.0.1
 python-dateutil==2.9.0.post0
 python-nvd3==0.16.0
